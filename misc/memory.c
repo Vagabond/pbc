@@ -22,8 +22,12 @@ static void* gmp_malloc(size_t size) {
  * because memory contents are not zeroed out. */
 static void* gmp_realloc(void *old_ptr, size_t old_size, size_t new_size) {
   void *new_ptr = malloc(new_size);
-  if(new_ptr && old_ptr)
-    memcpy(new_ptr, old_ptr, old_size);
+  if(new_ptr && old_ptr) {
+    // If we're shrinking the allocation size, make sure to limit
+    // how much data we copy.
+    size_t min_sz = (new_size > old_size) ? old_size : new_size;
+    memcpy(new_ptr, old_ptr, min_sz);
+  }
   gmp_free(old_ptr, old_size);
   return new_ptr;
 }
