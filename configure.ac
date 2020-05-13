@@ -164,6 +164,44 @@ fi
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
+AC_CHECK_FUNCS([explicit_bzero explicit_memset])
+
+
+AC_MSG_CHECKING([for memset_s])
+AC_LINK_IFELSE(
+[
+  AC_LANG_PROGRAM([[
+  #define __STDC_WANT_LIB_EXT1__ 1
+  #include <string.h>
+  int main(void) {
+      char dst = 1;
+      memset_s(&dst, 0, 1);
+  }
+  ]])
+],
+[
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([HAVE_MEMSET_S], [1], [Has secure memset])
+],
+[
+  AC_MSG_RESULT([no])
+  AC_DEFINE([HAVE_MEMSET_S], [0], [Has secure memset])
+])
+
+AC_MSG_CHECKING([for barrier intrinsic])
+AC_LINK_IFELSE(
+[
+  AC_LANG_PROGRAM([[]], [[volatile int val = 1; __sync_synchronize();]])
+],
+[
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([HAVE_SYNC_SYNCHRONIZE], [1], [Has barrier intrinsic])
+],
+[
+  AC_MSG_RESULT([no])
+  AC_DEFINE([HAVE_SYNC_SYNCHRONIZE], [0], [Has barrier intrinsic])
+])
+
 
 AC_CONFIG_FILES([Makefile example/Makefile gen/Makefile])
 AC_OUTPUT
