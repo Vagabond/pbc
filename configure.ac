@@ -86,7 +86,8 @@ if test "x$LEX" != xflex; then
 fi
 
 AC_PROG_YACC
-if test "x$YACC" != "xbison -y"; then
+set -- $YACC
+if test "x$1" != "xbison"; then
   echo "************************"
   echo "bison not found"
   echo "************************"
