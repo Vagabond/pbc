@@ -1,6 +1,3 @@
-#define __STDC_WANT_LIB_EXT1__ 1
-
-#include "config.h"
 #include <stdlib.h>
 #include <stdint.h> // for intptr_t
 #include <stdio.h>
@@ -9,27 +6,10 @@
 #include "pbc_memory.h"
 
 #ifdef SAFE_CLEAN
-
-/* guaranteed to not be optimized away */
-static inline void pbc_mem_clear(void * dst, size_t n) {
-#if defined(HAVE_MEMSET_S) && HAVE_MEMSET_S == 1
-    memset_s(dst, 0, n);
-#elif defined(HAVE_EXPLICIT_BZERO) && HAVE_EXPLICIT_BZERO == 1
-    explicit_bzero(dst, n);
-#elif defined(HAVE_EXPLICIT_MEMSET) && HAVE_EXPLICIT_MEMSET == 1
-    explicit_memset(dst, 0, n);
-#elif defined(HAVE_SYNC_SYNCHRONIZE) && HAVE_SYNC_SYNCHRONIZE == 1
-    memset(dst, 0, n);
-    __sync_synchronize();
-#else
-#error no mechanism to prevent optimizing away sensitive memory erasure
-#endif
-}
-
 /* guarantee zeroing the memory */
 static void gmp_free(void *ptr, size_t size) {
   if(ptr)
-    pbc_mem_clear(ptr, size);
+    memset(ptr, 0, size);
   free(ptr);
 }
 
@@ -85,7 +65,7 @@ static void *pbc_mem_malloc(size_t size) {
 }
 
 static void pbc_mem_free(void *ptr) {
-  pbc_mem_clear(ptr, pbc_mem_get_size(ptr) + sizeof(size_t));
+  memset(ptr, 0, pbc_mem_get_size(ptr) + sizeof(size_t));
   free(ptr);
 }
 
@@ -143,7 +123,7 @@ void pbc_set_memory_functions(void *(*malloc_fn)(size_t),
 void *pbc_calloc(size_t nmemb, size_t size) {
   void *res = pbc_malloc(nmemb * size);
   if (!res) pbc_die("calloc() error");
-  pbc_mem_clear(res, nmemb * size);
+  memset(res, 0, nmemb * size);
   return res;
 }
 
