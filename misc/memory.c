@@ -1,3 +1,4 @@
+#include <gmp.h>
 #include <stdlib.h>
 #include <stdint.h> // for intptr_t
 #include <stdio.h>
@@ -33,7 +34,7 @@ static void* gmp_realloc(void *old_ptr, size_t old_size, size_t new_size) {
 }
 
 static void gmp_guarantee_zero_memory(void) {
-  __gmp_set_memory_functions(gmp_malloc, gmp_realloc, gmp_free);
+  mp_set_memory_functions(gmp_malloc, gmp_realloc, gmp_free);
 }
 
 __attribute__((constructor)) void init(void) {
